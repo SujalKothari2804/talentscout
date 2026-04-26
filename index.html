@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="TalentScout HR Dashboard - Manage and evaluate candidates with data-driven insights." />
+  <title>TalentScout - HR Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ===== SCREEN 1: CONNECT ===== -->
+  <div id="connectScreen" class="connect-screen">
+    <div class="connect-card">
+      <div class="connect-brand">
+        <div class="connect-brand-icon">TS</div>
+        <div class="connect-brand-text">
+          <h1>TalentScout</h1>
+          <p>HR Dashboard</p>
+        </div>
+      </div>
+      <p class="connect-description">
+        Connect your Google Apps Script web app to load and manage candidate data. Paste the deployment URL below and click connect.
+      </p>
+      <form id="connectForm" class="connect-form" autocomplete="off">
+        <div>
+          <label class="form-label" for="webAppUrl">Web App URL</label>
+          <input
+            type="url"
+            id="webAppUrl"
+            class="form-input"
+            placeholder="https://script.google.com/macros/s/.../exec"
+            required
+          />
+        </div>
+        <p id="connectError" class="connect-error"></p>
+        <button type="submit" id="connectBtn" class="btn btn-primary btn-full">
+          Load Candidates
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== SCREEN 2: DASHBOARD ===== -->
+  <div id="dashboardScreen" class="dashboard-screen">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-inner">
+        <div class="header-brand">
+          <div class="header-logo">TS</div>
+          <div>
+            <div class="header-title">TalentScout</div>
+            <div class="header-subtitle">HR Dashboard</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;">
+          <div class="header-status">
+            <span class="header-status-dot"></span>
+            Connected
+          </div>
+          <button id="disconnectBtn" class="btn-disconnect">Disconnect</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Stats Bar -->
+      <section class="stats-bar" id="statsBar">
+        <div class="stat-card" data-type="total">
+          <div class="stat-value" id="statTotal">--</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-card" data-type="shortlisted">
+          <div class="stat-value" id="statShortlisted">--</div>
+          <div class="stat-label">Shortlisted</div>
+        </div>
+        <div class="stat-card" data-type="rejected">
+          <div class="stat-value" id="statRejected">--</div>
+          <div class="stat-label">Rejected</div>
+        </div>
+        <div class="stat-card" data-type="pending">
+          <div class="stat-value" id="statPending">--</div>
+          <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card" data-type="avg-match">
+          <div class="stat-value" id="statAvgMatch">--%</div>
+          <div class="stat-label">Avg Match</div>
+        </div>
+      </section>
+
+      <!-- Toolbar -->
+      <section class="toolbar">
+        <div class="filter-group">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="shortlisted">Shortlisted</button>
+          <button class="filter-btn" data-filter="rejected">Rejected</button>
+          <button class="filter-btn" data-filter="pending">Pending</button>
+          <button class="filter-btn" data-filter="highest">Highest Priority</button>
+          <span class="filter-count" id="filterCount"></span>
+        </div>
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search by name or skill..."
+          />
+        </div>
+      </section>
+
+      <!-- Table -->
+      <section class="table-wrapper">
+        <div class="table-scroll">
+          <table class="data-table" id="candidateTable">
+            <thead>
+              <tr>
+                <th data-sort="name">Candidate <span class="sort-icon">&#9650;</span></th>
+                <th data-sort="match">Match <span class="sort-icon">&#9650;</span></th>
+                <th data-sort="bonus">Bonus <span class="sort-icon">&#9650;</span></th>
+                <th data-sort="interest">Interest <span class="sort-icon">&#9650;</span></th>
+                <th data-sort="decision">Decision <span class="sort-icon">&#9650;</span></th>
+                <th data-sort="priority">Priority <span class="sort-icon">&#9650;</span></th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="candidateBody">
+              <!-- Rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="emptyState" style="display:none;">
+          <div class="empty-state-title">No candidates found</div>
+          <div class="empty-state-text">Try adjusting your filters or search query.</div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===== DRAWER (Detail Panel) ===== -->
+  <div id="drawerOverlay" class="drawer-overlay"></div>
+  <aside id="drawer" class="drawer">
+    <div class="drawer-header">
+      <div>
+        <h2 class="drawer-title" id="drawerName">Candidate Details</h2>
+        <div class="drawer-meta" id="drawerMeta">--</div>
+      </div>
+      <button class="drawer-close" id="drawerClose" aria-label="Close drawer">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="drawer-body" id="drawerBody">
+      <!-- Content injected dynamically by JS -->
+    </div>
+  </aside>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
